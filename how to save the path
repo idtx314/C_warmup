@@ -1,0 +1,6 @@
+Depth first
+
+-as you go, save the coordinates you turn to 4s in a path array, and keep an index of the number of coords you've iterated through.
+-when you detect more than one zero from a coord, save the index in an array of branch indexes. the root should be the first branch.
+-when you detect less than one zero from a coord, iterate back to the most recent branch index, removing coords from the path array as you go.
+-scan from that coord, iterating back again if all branches have been explored from there. This should return you to the root after a few iterations.
