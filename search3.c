@@ -162,45 +162,89 @@ void df_search(int **map)
         map[pos.row][pos.column] = 4;
 
         //Search around coord for zeroes and add them to search array.
-        if ( (pos.column + 1 < MAP_W) && (map[pos.row][pos.column + 1] == 0) )
+        //if 3 found, add its coords to the path and break loop
+        if (pos.column + 1 < MAP_W)
         {
-            //add to search array
-            search[add].row = pos.row;
-            search[add].column = pos.column + 1;
-            //++ zerofind counter
-            add++;
-            remove++;
-            zerofind++;
+            if (map[pos.row][pos.column + 1] == 0)
+            {
+                //add to search array
+                search[add].row = pos.row;
+                search[add].column = pos.column + 1;
+                //++ counters
+                add++;
+                remove++;
+                zerofind++;
+            }
+            else if (map[pos.row][pos.column + 1] == 3)
+            {
+                path[path_index].row = pos.row;
+                path[path_index].column = pos.column + 1;
+                path_index++
+                break;
+            }
         }
-        if ( (pos.row + 1 < MAP_H) && (map[pos.row + 1][pos.column] == 0) )
+
+        if (pos.row + 1 < MAP_H)
         {
-            //add to search array
-            search[add].row = pos.row + 1;
-            search[add].column = pos.column;
-            //++ zerofind counter
-            add++;
-            remove++;
-            zerofind++;
+            if (map[pos.row + 1][pos.column] == 0)
+            {
+                //add to search array
+                search[add].row = pos.row + 1;
+                search[add].column = pos.column;
+                //++ counters
+                add++;
+                remove++;
+                zerofind++;
+            }
+            else if (map[pos.row + 1][pos.column] == 3)
+            {
+                path[path_index].row = pos.row + 1;
+                path[path_index].column = pos.column;
+                path_index++
+                break;
+            }
         }
-        if ( (pos.column - 1 > -1) && (map[pos.row][pos.column - 1] == 0) )
+
+        if (pos.column - 1 > -1)
         {
-            //add to search array
-            search[add].row = pos.row;
-            search[add].column = pos.column - 1;
-            //++ zerofind counter
-            add++;
-            remove++;
-            zerofind++;
+            if (map[pos.row][pos.column - 1] == 0)
+            {
+                //add to search array
+                search[add].row = pos.row;
+                search[add].column = pos.column - 1;
+                //++ counters
+                add++;
+                remove++;
+                zerofind++;
+            }
+            else if (map[pos.row][pos.column - 1] == 3)
+            {
+                path[path_index].row = pos.row;
+                path[path_index].column = pos.column - 1;
+                path_index++
+                break;
+            }
         }
-        if ( (pos.row - 1 > -1) && (map[pos.row - 1][pos.column] == 0) )
+
+        if (pos.row - 1 > -1)
         {
-            //add to search array
-            search[add].row = pos.row - 1;
-            search[add].column = pos.column;
-            //++ zerofind counter
-            add++;
-            remove++;
-            zerofind++;
+            if (map[pos.row - 1][pos.column] == 0)
+            {
+                //add to search array
+                search[add].row = pos.row - 1;
+                search[add].column = pos.column;
+                //++ counters
+                add++;
+                remove++;
+                zerofind++;
+            }
+            else if (map[pos.row - 1][pos.column] == 3)
+            {
+                path[path_index].row = pos.row - 1;
+                path[path_index].column = pos.column;
+                path_index++
+                break;
+            }
         }
 
         //if two or more zeroes found, add the path index to the branches array.
@@ -233,9 +277,6 @@ void df_search(int **map)
             }
         }
         //issue here, I want to remove the branch and go back to the previous branch if there are no more viable paths from this point, but if I add it into the search array it will add coords to the search array that were already there. Need to do a separte check then.
-
-        //if 3 found, add its coords to the path and break loop
-
     }
 
     // //create a fabricated path for debug
