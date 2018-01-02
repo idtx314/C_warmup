@@ -99,6 +99,7 @@ void df_search(int **map)
     //allocate memory for 25 paths of length 25
     // coordinate **pth_array = malloc( sizeof(coordinate*) * 25); //for breadth
     coordinate *path = malloc(sizeof(coordinate) * 25 /** 25*/ );
+    int path_index = 0;
     //Initialize path at -1.
     for (int i=0; i<25; i++)
     {
@@ -125,16 +126,22 @@ void df_search(int **map)
         search[i].column = -1;
     }
 
-
     //Add start to search array
     search[add].row = 1;
     search[add].column = 1;
     add++;
     remove++;
 
+    //Allocate memory for array of path indices that are branch points
+    int *branches = malloc(sizeof(int) * 10);
+    int branch_index = 0; //index of branches to add to
+    for(int i=0; i<10; i++)
+        branches[i] = -1;
 
+    //search loop
     coordinate pos;
-    for ( int i=0; i < 40; i++ ); //loop
+    int zerofind = 0;
+    for ( int i=0; i < 40; i++ );
     {
         //get search coord from search array
         pos.row = search[remove].row;
@@ -147,19 +154,90 @@ void df_search(int **map)
         remove--;
 
         //add coord to path
-        path[index].row = pos.row;
-        path[index].column = pos.column;
+        path[path_index].row = pos.row;
+        path[path_index].column = pos.column;
+        path_index++;
 
-        //search around coord
         //change search coord to 4
-        //if zeros found, add their coords to search array
-            //if two or more zeroes found, add the path index to the branches array.
-            //if no zeroes found, remove entries from the path back to the last branch point
-            //if there are zeroes around branch point then continue, if there are no zeroes then remove branch point from list, remove entries from the path back to the previous branch point and repeat check there
-    //issue here, I want to remove the branch and go back to the previous branch if there are no more viable paths from this point, but if I add it into the search array it will add zeroes to the search array that were already there.
+        map[pos.row][pos.column] = 4;
+
+        //Search around coord for zeroes and add them to search array.
+        if ( (pos.column + 1 < MAP_W) && (map[pos.row][pos.column + 1] == 0) )
+        {
+            //add to search array
+            search[add].row = pos.row;
+            search[add].column = pos.column + 1;
+            //++ zerofind counter
+            add++;
+            remove++;
+            zerofind++;
+        }
+        if ( (pos.row + 1 < MAP_H) && (map[pos.row + 1][pos.column] == 0) )
+        {
+            //add to search array
+            search[add].row = pos.row + 1;
+            search[add].column = pos.column;
+            //++ zerofind counter
+            add++;
+            remove++;
+            zerofind++;
+        }
+        if ( (pos.column - 1 > -1) && (map[pos.row][pos.column - 1] == 0) )
+        {
+            //add to search array
+            search[add].row = pos.row;
+            search[add].column = pos.column - 1;
+            //++ zerofind counter
+            add++;
+            remove++;
+            zerofind++;
+        }
+        if ( (pos.row - 1 > -1) && (map[pos.row - 1][pos.column] == 0) )
+        {
+            //add to search array
+            search[add].row = pos.row - 1;
+            search[add].column = pos.column;
+            //++ zerofind counter
+            add++;
+            remove++;
+            zerofind++;
+        }
+
+        //if two or more zeroes found, add the path index to the branches array.
+        if (zerofind > 1)
+        {
+            branches[branch_index] = path_index - 1;
+            branch_index++;
+        }
+
+        //if no zeroes found, remove entries from the path back to the last branch point
+        if (zerofind == 0)
+        {
+            while(true)
+            {
+                //trim back to branch point
+                while ((branches[branch_index-1]) < (path_index -1))
+                {
+                    path[path_index-1].row = -1;
+                    path[path_index-1].column = -1;
+                    path_index--;
+                }
+                //if no zeroes around branch, trim from branch list and repeat
+                if((map[path[path_index-1].row][path[path_index-1].column+1]==0) || (map[path[path_index-1].row+1][path[path_index-1].column]==0) || (map[path[path_index-1].row][path[path_index-1].column+1]==0) || (map[path[path_index-1].row-1][path[path_index-1].column]==0))
+                    break;
+                else
+                {
+                    branches[branch_index-1] = -1
+                    branch_index--;
+                }
+            }
+        }
+        //issue here, I want to remove the branch and go back to the previous branch if there are no more viable paths from this point, but if I add it into the search array it will add coords to the search array that were already there. Need to do a separte check then.
+
         //if 3 found, add its coords to the path and break loop
 
     }
+
     // //create a fabricated path for debug
     // for (int i=0; i<25; i++)
     // {
@@ -211,5 +289,6 @@ set pos to variable start position
 make index lowering function to keep breadth search array short
 implement more intelligent df loop type
 change remove strategy for breadth
+resolve out of bounds searching issue
 
 */
