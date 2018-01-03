@@ -141,8 +141,10 @@ void df_search(int **map)
     //search loop
     coordinate pos;
     int zerofind = 0;
-    for ( int i=0; i < 40; i++ );
+    for ( int i=0; i < 40; i++ )
     {
+
+
         //get search coord from search array
         pos.row = search[remove].row;
         pos.column = search[remove].column;
@@ -157,6 +159,20 @@ void df_search(int **map)
         path[path_index].row = pos.row;
         path[path_index].column = pos.column;
         path_index++;
+
+        //print path array
+        for ( int j=0; j<25; j++)
+        {
+            if ((path[j].row==-1)&&(path[j].column==-1))
+            {
+                break;
+            }
+            else
+            {
+                printf("(%d,%d) ",path[j].row,path[j].column);
+            }
+        }
+        printf("\n");
 
         //change search coord to 4
         map[pos.row][pos.column] = 4;
@@ -179,7 +195,7 @@ void df_search(int **map)
             {
                 path[path_index].row = pos.row;
                 path[path_index].column = pos.column + 1;
-                path_index++
+                path_index++;
                 break;
             }
         }
@@ -200,7 +216,7 @@ void df_search(int **map)
             {
                 path[path_index].row = pos.row + 1;
                 path[path_index].column = pos.column;
-                path_index++
+                path_index++;
                 break;
             }
         }
@@ -221,7 +237,7 @@ void df_search(int **map)
             {
                 path[path_index].row = pos.row;
                 path[path_index].column = pos.column - 1;
-                path_index++
+                path_index++;
                 break;
             }
         }
@@ -242,11 +258,11 @@ void df_search(int **map)
             {
                 path[path_index].row = pos.row - 1;
                 path[path_index].column = pos.column;
-                path_index++
+                path_index++;
                 break;
             }
         }
-
+        //printf("zerofind: %d\n",zerofind);
         //if two or more zeroes found, add the path index to the branches array.
         if (zerofind > 1)
         {
@@ -257,8 +273,9 @@ void df_search(int **map)
         //if no zeroes found, remove entries from the path back to the last branch point
         if (zerofind == 0)
         {
-            while(true)
+            while(1)
             {
+                //printf("branch: %d, path: %d\n",branch_index,path_index);
                 //trim back to branch point
                 while ((branches[branch_index-1]) < (path_index -1))
                 {
@@ -266,16 +283,46 @@ void df_search(int **map)
                     path[path_index-1].column = -1;
                     path_index--;
                 }
-                //if no zeroes around branch, trim from branch list and repeat
-                if((map[path[path_index-1].row][path[path_index-1].column+1]==0) || (map[path[path_index-1].row+1][path[path_index-1].column]==0) || (map[path[path_index-1].row][path[path_index-1].column+1]==0) || (map[path[path_index-1].row-1][path[path_index-1].column]==0))
-                    break;
-                else
+                printf("Break1\n");
+                printf("branch: %d, path: %d\n",branch_index,path_index);
+                printf("Bool: %d\n",((path[path_index-1].column+1 < MAP_W)
+                        && (map[path[path_index-1].row][path[path_index-1].column+1]==0))
+                    ||
+                    ((path[path_index-1].row+1 < MAP_H)
+                        && (map[path[path_index-1].row+1][path[path_index-1].column]==0))
+                    ||
+                    ((path[path_index-1].column-1 > -1)
+                        && (map[path[path_index-1].row][path[path_index-1].column-1]==0))
+                    ||
+                    ((path[path_index-1].row-1 > -1)
+                        && (map[path[path_index-1].row-1][path[path_index-1].column]==0)));
+                //if any coord both inside the map and adjacent to the branch point is zero break the loop. Else, trim from branch list and repeat pruning.
+                if(
+                    ((path[path_index-1].column+1 < MAP_W)
+                        && (map[path[path_index-1].row][path[path_index-1].column+1]==0))
+                    ||
+                    ((path[path_index-1].row+1 < MAP_H)
+                        && (map[path[path_index-1].row+1][path[path_index-1].column]==0))
+                    ||
+                    ((path[path_index-1].column-1 > -1)
+                        && (map[path[path_index-1].row][path[path_index-1].column-1]==0))
+                    ||
+                    ((path[path_index-1].row-1 > -1)
+                        && (map[path[path_index-1].row-1][path[path_index-1].column]==0))
+                    )
                 {
-                    branches[branch_index-1] = -1
+                    printf("Break2\n");
+                    break;
+                }
+                else //segfault may be in here. The rest of the code in this loop works once before this is activated.
+                {
+                    printf("Break3\n");
+                    branches[branch_index-1] = -1;
                     branch_index--;
                 }
             }
         }
+        zerofind = 0;
         //issue here, I want to remove the branch and go back to the previous branch if there are no more viable paths from this point, but if I add it into the search array it will add coords to the search array that were already there. Need to do a separte check then.
     }
 
