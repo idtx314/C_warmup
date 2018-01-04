@@ -18,6 +18,7 @@ void freeCoordMemory(coordinate **pth_array);
 void df_search(int **map);
 void bf_search(int **map);
 void finishPath(int **map, coordinate *path);
+coordinate findStart(int **map);
 
 /**************MAIN****************************/
 int main()
@@ -26,20 +27,21 @@ int main()
     int input=0;
 
     //assign values to map
+    FILE *file_input;
+    file_input = fopen("map.txt", "r");
     for (int i = 0; i < MAP_H; i++) //For each row
     {
         for (int j = 0; j < MAP_W; j++) //For each column
         {
-            scanf("%d",&input); //1 1 1 1 0  0 2 0 0 0  0 1 1 1 1  0 1 1 3 1  0 0 0 0 0
+            fscanf(file_input,"%d",&input);
             map[i][j] = input;
-            // printf("%d",input); //Debug
         }
-        // printf("\n"); //Debug
     }
+    fclose(file_input);
 
     //Find path and modify map to contain it
     df_search(map);
-    //bf_search(map);
+    // bf_search(map);
 
     //print map by passing **map
     printMap(map);
@@ -107,14 +109,6 @@ void df_search(int **map)
         path[i].column = -1;
     }
 
-    // //print valid path coordinates. Debug
-    // for (int i=0; i<25; i++)
-    // {
-    //     if ((path[i].row == -1)||(path[i].column == -1))
-    //         break;
-    //     printf("%d, %d\n", path[i].row,path[i].column);
-    // }
-
     //allocate memory for search array length 30, declare add & remove indices.
     coordinate *search = malloc(sizeof(coordinate) * 30);
     int add = 0;
@@ -127,8 +121,11 @@ void df_search(int **map)
     }
 
     //Add start to search array
-    search[add].row = 1;
-    search[add].column = 1;
+    coordinate pos = findStart(map);
+    search[add].row = pos.row;
+    // search[add].row = 1;
+    search[add].column = pos.column;
+    // search[add].column = 1;
     add++;
     remove++;
 
@@ -139,7 +136,6 @@ void df_search(int **map)
         branches[i] = -1;
 
     //search loop
-    coordinate pos;
     int zerofind = 0;
     for ( int i=0; i < 40; i++ )
     {
@@ -160,19 +156,19 @@ void df_search(int **map)
         path[path_index].column = pos.column;
         path_index++;
 
-        //print path array
-        for ( int j=0; j<25; j++)
-        {
-            if ((path[j].row==-1)&&(path[j].column==-1))
-            {
-                break;
-            }
-            else
-            {
-                printf("(%d,%d) ",path[j].row,path[j].column);
-            }
-        }
-        printf("\n");
+        // //Debug print path array
+        // for ( int j=0; j<25; j++)
+        // {
+        //     if ((path[j].row==-1)&&(path[j].column==-1))
+        //     {
+        //         break;
+        //     }
+        //     else
+        //     {
+        //         printf("(%d,%d) ",path[j].row,path[j].column);
+        //     }
+        // }
+        // printf("\n");
 
         //change search coord to 4
         map[pos.row][pos.column] = 4;
@@ -262,7 +258,6 @@ void df_search(int **map)
                 break;
             }
         }
-        //printf("zerofind: %d\n",zerofind);
         //if two or more zeroes found, add the path index to the branches array.
         if (zerofind > 1)
         {
@@ -283,19 +278,19 @@ void df_search(int **map)
                     path[path_index-1].column = -1;
                     path_index--;
                 }
-                printf("Break1\n");
-                printf("branch: %d, path: %d\n",branch_index,path_index);
-                printf("Bool: %d\n",((path[path_index-1].column+1 < MAP_W)
-                        && (map[path[path_index-1].row][path[path_index-1].column+1]==0))
-                    ||
-                    ((path[path_index-1].row+1 < MAP_H)
-                        && (map[path[path_index-1].row+1][path[path_index-1].column]==0))
-                    ||
-                    ((path[path_index-1].column-1 > -1)
-                        && (map[path[path_index-1].row][path[path_index-1].column-1]==0))
-                    ||
-                    ((path[path_index-1].row-1 > -1)
-                        && (map[path[path_index-1].row-1][path[path_index-1].column]==0)));
+                // printf("Break1\n");
+                // printf("branch: %d, path: %d\n",branch_index,path_index);
+                // printf("Bool: %d\n",((path[path_index-1].column+1 < MAP_W)
+                //         && (map[path[path_index-1].row][path[path_index-1].column+1]==0))
+                //     ||
+                //     ((path[path_index-1].row+1 < MAP_H)
+                //         && (map[path[path_index-1].row+1][path[path_index-1].column]==0))
+                //     ||
+                //     ((path[path_index-1].column-1 > -1)
+                //         && (map[path[path_index-1].row][path[path_index-1].column-1]==0))
+                //     ||
+                //     ((path[path_index-1].row-1 > -1)
+                //         && (map[path[path_index-1].row-1][path[path_index-1].column]==0)));
                 //if any coord both inside the map and adjacent to the branch point is zero break the loop. Else, trim from branch list and repeat pruning.
                 if(
                     ((path[path_index-1].column+1 < MAP_W)
@@ -311,12 +306,10 @@ void df_search(int **map)
                         && (map[path[path_index-1].row-1][path[path_index-1].column]==0))
                     )
                 {
-                    printf("Break2\n");
                     break;
                 }
                 else //segfault may be in here. The rest of the code in this loop works once before this is activated.
                 {
-                    printf("Break3\n");
                     branches[branch_index-1] = -1;
                     branch_index--;
                 }
@@ -355,13 +348,29 @@ void bf_search(int **map)
     //
 }
 
+coordinate findStart(int **map)
+{
+    coordinate result;
+    for(int i=0; i<MAP_H; i++) //Each Row
+    {
+        for(int j=0; j<MAP_W; j++) //Each Column
+        {
+            if (map[i][j] == 2)
+            {
+                result.row = i;
+                result.column = j;
+                return result;
+            }
+        }
+    }
+}
+
 void finishPath(int **map, coordinate *path)
 {
     for (int i=0; i<25; i++)
     {
         if ((path[i].row == -1)||(path[i].column == -1))
             break;
-        // printf("%d\n",i); //Debug loop number
         map[path[i].row][path[i].column] = 5;
     }
 }
