@@ -123,9 +123,7 @@ void df_search(int **map)
     //Add start to search array
     coordinate pos = findStart(map);
     search[add].row = pos.row;
-    // search[add].row = 1;
     search[add].column = pos.column;
-    // search[add].column = 1;
     add++;
     remove++;
 
@@ -270,7 +268,7 @@ void df_search(int **map)
         {
             while(1)
             {
-                //printf("branch: %d, path: %d\n",branch_index,path_index);
+                //printf("branch: %d, path: %d\n",branch_index,path_index); //Debug
                 //trim back to branch point
                 while ((branches[branch_index-1]) < (path_index -1))
                 {
@@ -278,9 +276,9 @@ void df_search(int **map)
                     path[path_index-1].column = -1;
                     path_index--;
                 }
-                // printf("Break1\n");
-                // printf("branch: %d, path: %d\n",branch_index,path_index);
-                // printf("Bool: %d\n",((path[path_index-1].column+1 < MAP_W)
+                // printf("Break1\n"); //Debug
+                // printf("branch: %d, path: %d\n",branch_index,path_index); //Debug
+                // printf("Bool: %d\n",((path[path_index-1].column+1 < MAP_W) //Debug
                 //         && (map[path[path_index-1].row][path[path_index-1].column+1]==0))
                 //     ||
                 //     ((path[path_index-1].row+1 < MAP_H)
@@ -308,7 +306,7 @@ void df_search(int **map)
                 {
                     break;
                 }
-                else //segfault may be in here. The rest of the code in this loop works once before this is activated.
+                else
                 {
                     branches[branch_index-1] = -1;
                     branch_index--;
@@ -319,26 +317,13 @@ void df_search(int **map)
         //issue here, I want to remove the branch and go back to the previous branch if there are no more viable paths from this point, but if I add it into the search array it will add coords to the search array that were already there. Need to do a separte check then.
     }
 
-    // //create a fabricated path for debug
-    // for (int i=0; i<25; i++)
-    // {
-    //     path[i].row = pos.row;
-    //     path[i].column = pos.column;
-    //     if(i == 0)
-    //         pos.column--;
-    //     if((i==1)||(i==2)||(i==3))
-    //         pos.row++;
-    //     if((i==4)||(i==5)||(i==6))
-    //         pos.column++;
-    //     if(i==7)
-    //         pos.row--;
-    // }
-
     //send path to finishing function
     finishPath(map, path);
 
     //Free memory
     free(path);
+    free(search);
+    free(branches);
 }
 
 
